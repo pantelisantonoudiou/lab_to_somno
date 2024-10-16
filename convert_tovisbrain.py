@@ -9,6 +9,31 @@ from tqdm import tqdm
 #### ------------------------------------------------------------- ####
 
 def lab_to_vis_scores(ch_comments, somno_states):
+    """
+    Converts lab comments to Visbrain scoring format by mapping comment text 
+    to corresponding somnotate labels and capturing state transitions.
+    
+    Parameters
+    ----------
+    ch_comments : list
+        A list of objects, where each object contains a 'text' attribute for 
+        the comment and a 'time' attribute for the timestamp of the comment.
+    somno_states : dict
+        A dictionary mapping the text of lab comments (keys) to corresponding 
+        somnotate states (values).
+    
+    Returns
+    -------
+    visbrain_data : list
+        A list of strings formatted for Visbrain. Each element represents a 
+        state transition or relevant header information. Returns 'True' if 
+        mismatched labels are found.
+    
+    Notes
+    -----
+    - If any label from the lab comments does not match the provided somno_states, 
+      it will print a warning and return True without completing the conversion.
+      """
     
     # get comments and comment times
     com_text = [x.text for x in ch_comments]
