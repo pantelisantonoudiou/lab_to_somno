@@ -49,12 +49,19 @@ def lab_to_vis_scores(ch_comments, somno_states):
         
     # Initialize a list to store the Visbrain format data
     visbrain_data = []
-    visbrain_data.append(f"*Duration_sec\t{com_times[-1]}")
+    
+    # add duration to the nearest 10 samples to allow downsampling
+    last_sample = ch_comments[-1].tick_position
+    duration = (last_sample + last_sample%10) * ch_comments[-1].tick_dt
+    visbrain_data.append(f"*Duration_sec\t{duration}")
     visbrain_data.append("*Datafile\tUnspecified")
     
     # Iterate over the dataframe to capture state transitions
     for com_txt, com_time in zip(somno_labels[:-1], com_times[1:]):
             visbrain_data.append(f"{com_txt}\t{com_time}")
+            
+    if duration > com_times[-1]:
+        visbrain_data.append(f"'Undefined\t{duration}")
     
     return visbrain_data
 
@@ -66,10 +73,9 @@ if __name__ == '__main__':
     somno_states = {'WAKE':'awake', 'NREM':'non-REM', 'REM':'REM',
                     'WAKJE':'awake', 'WAKR':'awake', 'WAKE\\':'awake',
                     'WALE':'awake', 'NEWM':'non-REM', 'WAKKE':'awake'}    
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
+    df = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
     
-    for cond, df in tqdm(selected_recordings.groupby('recording_id'), 
-                         total=len(selected_recordings['recording_id'].unique())):
+    for cond, df in tqdm(df.groupby('recording_id'), total=len(df['recording_id'].unique())):
         
         # find row that contains comments(BLA)
         row_dict = df[df['channel_name'].str.contains('BLA')].to_dict('records')[0]
