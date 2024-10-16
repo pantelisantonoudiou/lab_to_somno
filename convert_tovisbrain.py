@@ -8,19 +8,16 @@ import pandas as pd
 from tqdm import tqdm
 #### ------------------------------------------------------------- ####
 
-def lab_to_vis_scores(ch_comments, somno_states):
+def lab_to_vis_scores(com_df, somno_states, tick_dt):
     """
     Converts lab comments to Visbrain scoring format by mapping comment text 
     to corresponding somnotate labels and capturing state transitions.
     
     Parameters
     ----------
-    ch_comments : list
-        A list of objects, where each object contains a 'text' attribute for 
-        the comment and a 'time' attribute for the timestamp of the comment.
-    somno_states : dict
-        A dictionary mapping the text of lab comments (keys) to corresponding 
-        somnotate states (values).
+    ch_comments : df, comment df
+    somno_states : dict, mapping labchart comments to corresponding somnotate states (values).
+    tick_dt: float, time in second between two ticks
     
     Returns
     -------
@@ -34,13 +31,10 @@ def lab_to_vis_scores(ch_comments, somno_states):
     - If any label from the lab comments does not match the provided somno_states, 
       it will print a warning and return True without completing the conversion.
       """
-    
-    # get comments and comment times
-    com_text = [x.text for x in ch_comments]
-    com_times = [x.time for x in ch_comments]
-    
+
     # convert comments to somnotate labels
-    somno_labels = [somno_states.get(e, e) for e in com_text]
+    somno_labels = [somno_states.get(e, e) for e in com_df['com_text'].values]
+    com_times = com_df['com_time'].values
     
     # check if labels match
     if set(somno_labels) != set(somno_states.values()):
@@ -51,17 +45,18 @@ def lab_to_vis_scores(ch_comments, somno_states):
     visbrain_data = []
     
     # add duration to the nearest 10 samples to allow downsampling
-    last_sample = ch_comments[-1].tick_position
-    duration = (last_sample + last_sample%10) * ch_comments[-1].tick_dt
-    visbrain_data.append(f"*Duration_sec\t{duration}")
+    last_sample = com_df['com_sample'].values[-1]
+    file_duration = (last_sample + last_sample%10) * tick_dt
+    visbrain_data.append(f"*Duration_sec\t{file_duration}")
     visbrain_data.append("*Datafile\tUnspecified")
     
     # Iterate over the dataframe to capture state transitions
     for com_txt, com_time in zip(somno_labels[:-1], com_times[1:]):
             visbrain_data.append(f"{com_txt}\t{com_time}")
-            
-    if duration > com_times[-1]:
-        visbrain_data.append(f"'Undefined\t{duration}")
+    
+    # if file longer than last comment time add undefined period
+    if file_duration > com_times[-1]:
+        visbrain_data.append(f"'Undefined\t{file_duration}")
     
     return visbrain_data
 
@@ -81,10 +76,24 @@ if __name__ == '__main__':
         row_dict = df[df['channel_name'].str.contains('BLA')].to_dict('records')[0]
         file_path = os.path.join(main_path, row_dict['file_name'])
         
-        # load labchart file and convert comments to visbrain format
+        # load labchart file and convert comments to dataframe
         fread = adi.read_file(file_path)
-        ch_comments = fread.channels[row_dict['channel_id']].records[0].comments
-        visbrain_data = lab_to_vis_scores(ch_comments, somno_states)
+        ch_comments = fread.channels[0].records[0].comments
+        com_text = [x.text for x in ch_comments]
+        com_times = [x.time for x in ch_comments]
+        com_samples = [x.tick_position for x in ch_comments]
+        channel_id = [x.channel_ for x in ch_comments]
+        com_dt = [x.tick_dt for x in ch_comments]
+        com_df = pd.DataFrame(data = np.array([com_times, com_samples, channel_id, com_dt]).T,
+                              columns=['com_time', 'com_sample', 'channel_id', 'com_dt'], dtype=float)
+        com_df['com_text'] = com_text
+
+        # filter the channel in df and convert those comments
+        com_df = com_df[com_df['channel_id'] == row_dict['channel_id']-1]
+        if len(com_df) == 0: # skip if no comments
+            print(f'\n---> No comments were found skipping recording {cond}')
+            continue
+        visbrain_data = lab_to_vis_scores(com_df, somno_states, com_df['com_dt'].values[0])
     
         # Write the output to a text file
         file_name = f"{row_dict['file_name'][:-7]}_an{row_dict['animal_position']}.txt"
