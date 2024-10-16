@@ -73,9 +73,9 @@ if __name__ == '__main__':
     somno_states = {'WAKE':'awake', 'NREM':'non-REM', 'REM':'REM',
                     'WAKJE':'awake', 'WAKR':'awake', 'WAKE\\':'awake',
                     'WALE':'awake', 'NEWM':'non-REM', 'WAKKE':'awake'}    
-    df = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
     
-    for cond, df in tqdm(df.groupby('recording_id'), total=len(df['recording_id'].unique())):
+    for cond, df in tqdm(selected_recordings.groupby('recording_id')):
         
         # find row that contains comments(BLA)
         row_dict = df[df['channel_name'].str.contains('BLA')].to_dict('records')[0]
