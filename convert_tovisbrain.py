@@ -8,7 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 #### ------------------------------------------------------------- ####
 
-def lab_to_vis_scores(com_df, somno_states, tick_dt):
+def lab_to_vis_scores(com_df, somno_states):
     """
     Converts lab comments to Visbrain scoring format by mapping comment text 
     to corresponding somnotate labels and capturing state transitions.
@@ -17,7 +17,6 @@ def lab_to_vis_scores(com_df, somno_states, tick_dt):
     ----------
     ch_comments : df, comment df
     somno_states : dict, mapping labchart comments to corresponding somnotate states (values).
-    tick_dt: float, time in second between two ticks
     
     Returns
     -------
@@ -45,8 +44,7 @@ def lab_to_vis_scores(com_df, somno_states, tick_dt):
     visbrain_data = []
     
     # add duration to the nearest 10 samples to allow downsampling
-    last_sample = com_df['com_sample'].values[-1]
-    file_duration = (last_sample + last_sample%10) * tick_dt
+    file_duration = np.ceil(com_times[-1])
     visbrain_data.append(f"*Duration_sec\t{file_duration}")
     visbrain_data.append("*Datafile\tUnspecified")
     
@@ -56,7 +54,7 @@ def lab_to_vis_scores(com_df, somno_states, tick_dt):
     
     # if file longer than last comment time add undefined period
     if file_duration > com_times[-1]:
-        visbrain_data.append(f"'Undefined\t{file_duration}")
+        visbrain_data.append(f"Undefined\t{file_duration}")
     
     return visbrain_data
 
@@ -93,7 +91,7 @@ if __name__ == '__main__':
         if len(com_df) == 0: # skip if no comments
             print(f'\n---> No comments were found skipping recording {cond}')
             continue
-        visbrain_data = lab_to_vis_scores(com_df, somno_states, com_df['com_dt'].values[0])
+        visbrain_data = lab_to_vis_scores(com_df, somno_states)
     
         # Write the output to a text file
         file_name = f"{row_dict['file_name'][:-7]}_an{row_dict['animal_position']}.txt"
