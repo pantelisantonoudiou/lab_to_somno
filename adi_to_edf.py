@@ -34,9 +34,9 @@ def save_to_edf(save_path, data, channel_properties):
     if len(ch_data) != len(channel_properties['channel_name']):
         raise Exception('--> Warning channels in data do not match channels in channel_properties dict.')
     channel_info = []
-    for i in range(len(channel_properties["fs"])):
+    for i in range(len(channel_properties["sample_rate"])):
         channel_dict = {
-            "fs": channel_properties["fs"][i],
+            "sample_rate": channel_properties["sample_rate"][i],
             "label": channel_properties["channel_name"][i],
             "dimension": channel_properties["dimension"][i],
             "physical_max": channel_properties["physical_max"][i],
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     
     # edf settings with downsampled rate
     channel_properties = {
-           "fs" : [400, 400, 400],
+           "sample_rate" : [400, 400, 400],
            "channel_name":  ["BLA-LFP","FC-EEG","EMG"],
            "dimension": ["V","V","V"],
            "physical_max": [0.1, 0.1, 0.01],
@@ -87,9 +87,9 @@ if __name__ == '__main__':
         # get stop time for each recordings based on last comment
         file_path = os.path.join(load_path, row_dict['file_name'])
         fread = adi.read_file(file_path)
-        fs =  fread.channels[0].fs[0]
+        fs = fread.channels[0].fs[0]
         stop_sample = int(float(score_df.iloc[0].values[0].split('\t')[1]) * fs)
-        downsample_factor = int(fs/channel_properties['fs'][0])
+        downsample_factor = int(fs/channel_properties['sample_rate'][0])
 
         # read and downsample labchart data
         ch_data = []
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             ch_id = df.loc[df['channel_name'] == channel, 'channel_id'].values[0]
             single_channel_data = fread.channels[ch_id-1].get_data(block, start_sample=1, stop_sample=stop_sample)
             downsampled = decimate(single_channel_data, downsample_factor)
-            ch_data.append(single_channel_data)
+            ch_data.append(downsampled)
         del fread
         
         # rewrite to edf file
