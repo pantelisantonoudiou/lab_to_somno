@@ -54,7 +54,7 @@ def lab_to_vis_scores(com_df, somno_states):
     
     # if file longer than last comment time add undefined period
     if file_duration > com_times[-1]:
-        visbrain_data.append(f"Undefined\t{file_duration}")
+        visbrain_data.append(f"undefined\t{file_duration}")
     
     return visbrain_data
 
