@@ -47,7 +47,7 @@ for edf_file in edf_files:
     row.append(os.path.join(processed_path, edf_file[:-4] +  '.npy'))
     
     # file_path_manual_state_annotation
-    row.append(os.path.join(raw_path, edf_file[:-4] +  '_score.txt'))
+    row.append(os.path.join(raw_path, edf_file[:-4] +  '.txt'))
     
     # file_path_automated_state_annotation
     row.append(os.path.join(processed_path, edf_file[:-4] +  '_auto_state_annotation.hyp'))
