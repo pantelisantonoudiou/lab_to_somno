@@ -123,6 +123,7 @@ files = {'animal1': r"D:\scored_files_kj\pilot\processed\postCUS+SGE#5-8-1wk-11_
 # loop through animals
 int_to_state = {v: k for k, v in state_to_int.items()}
 data_list = []
+state_list = {}
 for animal_id in files:
     # load hypnogram and convert to sleep state vector
     states, intervals = load_hypnogram(files[animal_id])
@@ -134,6 +135,9 @@ for animal_id in files:
     df['animal_id'] = animal_id
     df['sleep_stage'] = df['sleep_state'].map(int_to_state)
     data_list.append(df)
+    state_list.update({animal_id:states})
+    
+# create data across animals
 data = pd.concat(data_list).reset_index(drop=True)
 data['time_hours'] = pd.to_datetime(data['time_sec'], unit='h', utc=True)
 data['time_hours'] = pd.to_datetime(data['time_sec'], unit='s').dt.strftime('%H:%M:%S')
@@ -146,14 +150,21 @@ data['time_am_pm'] = (start_time + pd.to_timedelta(data['time_sec'], unit='s')).
 sleep_df = data.groupby(['animal_id', 'sleep_stage'])['time_sec'].count().reset_index()
 sleep_df['total_time'] = sleep_df.groupby('animal_id')['time_sec'].transform('sum')
 sleep_df['percent_time'] = 100 * sleep_df['time_sec'] / sleep_df['total_time']
-sns.catplot(data=sleep_df, x='animal_id', y='percent_time', hue='sleep_stage', kind='bar')
+sns.catplot(data=sleep_df, hue='animal_id', y='percent_time', x='sleep_stage', kind='bar')
 
-# Reshape the data for heatmap (each row corresponds to one animal)
+# Plot state transitions
 pivot_data = data.pivot(index='animal_id', columns='time_hours', values='sleep_state')
-
 plt.figure(figsize=(12, 6))
-sns.heatmap(pivot_data, cmap=[ 'grey', 'blue', 'red'])
-# plt.plot(data['time_am_pm'], data['sleep_state'])
+sns.heatmap(pivot_data)
 
-
-
+# count transitions
+transition_list = []
+for animal_id in state_list:
+    transitions = state_list[animal_id]
+    # sleep_state = [state_to_int[sleep_stage] for sleep_stage in sleep_stages]
+    pairs = [f'{transitions[i]} -> {transitions[i + 1]}' for i in range(len(transitions) - 1)]
+    df = pd.DataFrame({'transition_pair':pairs, 'animal_id':np.repeat(animal_id, len(pairs))})
+    transition_list.append(df)
+transition_df = pd.concat(transition_list)
+plt.figure(figsize=(12, 6))
+sns.histplot(data=transition_df, x='transition_pair', hue='animal_id', multiple="dodge",shrink=.8)
