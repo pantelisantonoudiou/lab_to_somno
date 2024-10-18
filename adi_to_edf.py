@@ -56,8 +56,8 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"D:\scored_files_kj\labchart_data"
-    save_path = r"D:\scored_files_kj\somno_data"
+    load_path = r"D:\scored_files_kj\pilot\labchart_data"
+    save_path = r"D:\scored_files_kj\pilot\raw_data"
     block = 1
     
     # edf settings with downsampled rate
@@ -72,31 +72,26 @@ if __name__ == '__main__':
            }
     
     # read df with selected recordings
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\pilot\selected_recordings_pilot.xlsx")
     for i, df in tqdm(selected_recordings.groupby('recording_id')):
         
         # if associated score file exists load it and proceed with conversion
         row_dict = df[df['channel_name'].str.contains('BLA')].to_dict('records')[0]
         edf_file_name = f"{row_dict['file_name'][:-7]}_an{row_dict['animal_position']}.edf"
-        score_file_path = os.path.join(save_path, f"{edf_file_name[:-4]}.txt")
-        if not os.path.exists(score_file_path):
-            print(f"\n---> Path not found, skipping recording id {i}")
-            continue
-        score_df = pd.read_csv(score_file_path, header=None)
-        
+
         # get stop time for each recordings based on last comment
         file_path = os.path.join(load_path, row_dict['file_name'])
         fread = adi.read_file(file_path)
         fs = fread.channels[0].fs[0]
-        stop_sample = int(float(score_df.iloc[0].values[0].split('\t')[1]) * fs)
         downsample_factor = int(fs/channel_properties['sample_rate'][0])
 
         # read and downsample labchart data
         ch_data = []
         for channel in channel_properties['channel_name']:
             ch_id = df.loc[df['channel_name'] == channel, 'channel_id'].values[0]
-            single_channel_data = fread.channels[ch_id-1].get_data(block, start_sample=1, stop_sample=stop_sample)
-            downsampled = decimate(single_channel_data, downsample_factor)
+            single_channel_data = fread.channels[ch_id-1].get_data(block)
+            trim_len = len(single_channel_data) - len(single_channel_data)%channel_properties['sample_rate'][0]
+            downsampled = decimate(single_channel_data[:trim_len], downsample_factor)
             ch_data.append(downsampled)
         del fread
         
