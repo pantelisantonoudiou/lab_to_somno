@@ -167,4 +167,4 @@ for animal_id in state_list:
     transition_list.append(df)
 transition_df = pd.concat(transition_list)
 plt.figure(figsize=(12, 6))
-sns.histplot(data=transition_df, x='transition_pair', hue='animal_id', multiple="dodge",shrink=.8)
+sns.histplot(data=transition_df, x='transition_pair', hue='animal_id', multiple="dodge",shrink=.8, stat='probability')
