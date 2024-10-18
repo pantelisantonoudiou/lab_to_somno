@@ -165,6 +165,26 @@ for animal_id in state_list:
     pairs = [f'{transitions[i]} -> {transitions[i + 1]}' for i in range(len(transitions) - 1)]
     df = pd.DataFrame({'transition_pair':pairs, 'animal_id':np.repeat(animal_id, len(pairs))})
     transition_list.append(df)
-transition_df = pd.concat(transition_list)
+transition_df = pd.concat(transition_list).reset_index(drop=True)
 plt.figure(figsize=(12, 6))
-sns.histplot(data=transition_df, x='transition_pair', hue='animal_id', multiple="dodge",shrink=.8, stat='probability')
+sns.histplot(data=transition_df, x='transition_pair', hue='animal_id', multiple="dodge", shrink=.8, stat='probability')
+
+# number of bouts
+bout_df_list = []
+for animal_id in state_list:
+   df = pd.DataFrame({'sleep_stage':state_list[animal_id], 'animal_id':np.repeat(animal_id, len(state_list[animal_id]))})
+   bout_df_list.append(df)
+bout_df =  pd.concat(bout_df_list).reset_index(drop=True)
+plt.figure(figsize=(12, 6))
+sns.countplot(data=bout_df, x='sleep_stage', hue='animal_id',)
+   
+# bout duration
+data['state_change'] = (data['sleep_stage'] != data['sleep_stage'].shift()).cumsum()
+data['cumulative_time'] = data.groupby(['animal_id', 'state_change']).cumcount() + 1
+bout_length_df = data.groupby(['animal_id', 'sleep_stage', 'state_change'])['cumulative_time'].max().reset_index()
+# bout_length_df = bout_length_df.groupby(['animal_id', 'sleep_stage',])['cumulative_time'].mean().reset_index()
+sns.catplot(data=bout_length_df, x='sleep_stage', hue='animal_id', y='cumulative_time', kind='bar', errorbar='se')
+   
+
+
+
