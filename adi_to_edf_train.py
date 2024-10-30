@@ -56,9 +56,12 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"D:\scored_files_kj\labchart_data"
-    save_path = r"D:\scored_files_kj\somno_data"
+    load_path = r"D:\scored_files_kj\test_model\labchart_data"
+    save_path = r"D:\scored_files_kj\test_model\raw_data"
     block = 1
+    
+    # read df with selected recordings
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\test_model\selected_recordings KJ.xlsx")
     
     # edf settings with downsampled rate
     channel_properties = {
@@ -71,8 +74,7 @@ if __name__ == '__main__':
            "digital_min": [-32000, -32000, -32000],
            }
     
-    # read df with selected recordings
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
+
     for i, df in tqdm(selected_recordings.groupby('recording_id')):
         
         # if associated score file exists load it and proceed with conversion

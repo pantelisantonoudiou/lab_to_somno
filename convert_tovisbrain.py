@@ -37,6 +37,7 @@ def lab_to_vis_scores(com_df, somno_states):
     
     # check if labels match
     if set(somno_labels) != set(somno_states.values()):
+        breakpoint()
         print('--> Some labels seem to be incorrect', set(somno_labels))
         return True
         
@@ -61,13 +62,15 @@ def lab_to_vis_scores(com_df, somno_states):
 if __name__ == '__main__':
     
     # get settings and read excel file with paths
-    main_path = r"D:\scored_files_kj\labchart_data"
-    save_path = r"D:\scored_files_kj\somno_data"
+    main_path = r"D:\scored_files_kj\test_model\labchart_data"
+    save_path = r"D:\scored_files_kj\test_model\raw_data"
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\test_model\selected_recordings KJ.xlsx")
     somno_states = {'WAKE':'awake', 'NREM':'non-REM', 'REM':'REM',
                     'WAKJE':'awake', 'WAKR':'awake', 'WAKE\\':'awake',
-                    'WALE':'awake', 'NEWM':'non-REM', 'WAKKE':'awake'}    
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\selected_recordings KJ.xlsx")
-    
+                    'WALE':'awake', 'NEWM':'non-REM', 'WAKKE':'awake',
+                    'undefined':'undefined'}    
+
+    # iterate
     for cond, df in tqdm(selected_recordings.groupby('recording_id')):
         
         # find row that contains comments(BLA)

@@ -23,8 +23,9 @@ columns = ['file_path_raw_signals',
          'file_path_missing_value_intervals']
 
 # get edf files
-raw_path = r"D:\scored_files_kj\train_model\raw_data"
-processed_path = r"D:\scored_files_kj\train_model\processed"
+raw_path = r"D:\scored_files_kj\test_model\raw_data"
+processed_path = r"D:\scored_files_kj\test_model\processed"
+save_path = r"D:\scored_files_kj\test_model\input_for_test.csv"
 edf_files = [file for file in os.listdir(raw_path) if file[-4:] == '.edf']
 
 # create dataframe
@@ -74,7 +75,7 @@ for edf_file in edf_files:
     data.append(row)
     
 df = pd.DataFrame(data=np.array(data), columns=columns)
-df.to_csv(r"D:\scored_files_kj\train_model\input_for_train.csv", index=False)
+df.to_csv(save_path, index=False)
     
     
     
