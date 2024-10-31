@@ -83,8 +83,9 @@ def convert_state_intervals_to_state_vector(states, intervals, mapping,
         intervals = [(start/time_resolution, stop/time_resolution) for start, stop in intervals]
 
     if np.any([(isinstance(start, float), isinstance(stop, float)) for start, stop in intervals]):
-        import warnings
-        warnings.warn("Interval values are converted from floats to integers.")
+        # breakpoint()
+        # import warnings
+        # warnings.warn("Interval values are converted from floats to integers.")
         # # round up last interval such that the state vector is guaranteed to include the last time point
         # last_start, last_stop = intervals[-1]
         # intervals[-1] = (last_start, np.ceil(last_stop))

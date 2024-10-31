@@ -56,12 +56,12 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"D:\scored_files_kj\test_model\labchart_data"
-    save_path = r"D:\scored_files_kj\test_model\raw_data"
+    load_path = r"D:\scored_files_kj\train_model_all\labchart_data"
+    save_path = r"D:\scored_files_kj\train_model_all\raw_data"
     block = 1
     
     # read df with selected recordings
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\test_model\selected_recordings KJ.xlsx")
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\train_model_all\selected_recordings.xlsx")
     
     # edf settings with downsampled rate
     channel_properties = {

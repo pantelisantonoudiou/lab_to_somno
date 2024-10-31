@@ -36,8 +36,7 @@ def lab_to_vis_scores(com_df, somno_states):
     com_times = com_df['com_time'].values
     
     # check if labels match
-    if set(somno_labels) != set(somno_states.values()):
-        breakpoint()
+    if not set(somno_labels) <= set(somno_states.values()):
         print('--> Some labels seem to be incorrect', set(somno_labels))
         return True
         
@@ -62,9 +61,9 @@ def lab_to_vis_scores(com_df, somno_states):
 if __name__ == '__main__':
     
     # get settings and read excel file with paths
-    main_path = r"D:\scored_files_kj\test_model\labchart_data"
-    save_path = r"D:\scored_files_kj\test_model\raw_data"
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\test_model\selected_recordings KJ.xlsx")
+    main_path = r"D:\scored_files_kj\train_model_all\labchart_data"
+    save_path = r"D:\scored_files_kj\train_model_all\raw_data"
+    selected_recordings = pd.read_excel(r"D:\scored_files_kj\train_model_all\selected_recordings.xlsx")
     somno_states = {'WAKE':'awake', 'NREM':'non-REM', 'REM':'REM',
                     'WAKJE':'awake', 'WAKR':'awake', 'WAKE\\':'awake',
                     'WALE':'awake', 'NEWM':'non-REM', 'WAKKE':'awake',
