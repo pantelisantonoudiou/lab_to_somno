@@ -21,8 +21,9 @@ columns = ['file_path_raw_signals',
          'file_path_missing_value_intervals']
 
 # get edf files
-raw_path = r"D:\scored_files_kj\pilot\raw_data"
-processed_path = r"D:\scored_files_kj\pilot\processed"
+raw_path = r"R:\Collaborations\Seizure files for sleep scoring\raw_data"
+processed_path = r"R:\Collaborations\Seizure files for sleep scoring\processed"
+save_path = r"R:\Collaborations\Seizure files for sleep scoring\somno_input.csv"
 edf_files = [file for file in os.listdir(raw_path) if file[-4:] == '.edf']
 
 # create dataframe
@@ -72,7 +73,7 @@ for edf_file in edf_files:
     data.append(row)
     
 df = pd.DataFrame(data=np.array(data), columns=columns)
-df.to_csv(r"D:\scored_files_kj\pilot\somno_input.csv", index=False)
+df.to_csv(save_path, index=False)
     
     
     

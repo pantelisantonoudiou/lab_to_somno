@@ -56,8 +56,9 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"D:\scored_files_kj\pilot\labchart_data"
-    save_path = r"D:\scored_files_kj\pilot\raw_data"
+    load_path = r"R:\Collaborations\Seizure files for sleep scoring\labchart_data"
+    save_path = r"R:\Collaborations\Seizure files for sleep scoring\raw_data"
+    selected_recordings = pd.read_excel(r"R:\Collaborations\Seizure files for sleep scoring\file_info.xlsx")
     block = 1
     
     # edf settings with downsampled rate
@@ -72,7 +73,6 @@ if __name__ == '__main__':
            }
     
     # read df with selected recordings
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\pilot\selected_recordings_pilot.xlsx")
     for i, df in tqdm(selected_recordings.groupby('recording_id')):
         
         # if associated score file exists load it and proceed with conversion
