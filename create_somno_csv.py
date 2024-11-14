@@ -21,9 +21,10 @@ columns = ['file_path_raw_signals',
          'file_path_missing_value_intervals']
 
 # get edf files
-raw_path = r"R:\Collaborations\Seizure files for sleep scoring\raw_data"
-processed_path = r"R:\Collaborations\Seizure files for sleep scoring\processed"
-save_path = r"R:\Collaborations\Seizure files for sleep scoring\somno_input.csv"
+raw_path = r"D:\sleep_scoring\cus_files\raw_data"
+processed_path = r"D:\sleep_scoring\cus_files\processed"
+save_path = r"D:\sleep_scoring\cus_files\somno_input.csv"
+sample_rate = 250
 edf_files = [file for file in os.listdir(raw_path) if file[-4:] == '.edf']
 
 # create dataframe
@@ -40,7 +41,7 @@ for edf_file in edf_files:
     row.append('EMG')
     
     # sampling_frequency_in_hz
-    row.append(400)
+    row.append(sample_rate)
     
     # file_path_preprocessed_signals
     row.append(os.path.join(processed_path, edf_file[:-4] +  '.npy'))

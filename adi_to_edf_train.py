@@ -56,16 +56,16 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"D:\scored_files_kj\train_model_all\labchart_data"
-    save_path = r"D:\scored_files_kj\train_model_all\raw_data"
+    load_path = r"D:\sleep_scoring\scored_files_kj\train_model_all\labchart_data"
+    save_path = r"D:\sleep_scoring\scored_files_kj\train_model_all\raw_data"
     block = 1
     
     # read df with selected recordings
-    selected_recordings = pd.read_excel(r"D:\scored_files_kj\train_model_all\selected_recordings.xlsx")
+    selected_recordings = pd.read_excel(r"D:\sleep_scoring\scored_files_kj\train_model_all\selected_recordings.xlsx")
     
     # edf settings with downsampled rate
     channel_properties = {
-           "sample_rate" : [400, 400, 400],
+           "sample_rate" : [250, 250, 250],
            "channel_name":  ["BLA-LFP","FC-EEG","EMG"],
            "dimension": ["V","V","V"],
            "physical_max": [0.1, 0.1, 0.01],

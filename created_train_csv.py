@@ -23,9 +23,10 @@ columns = ['file_path_raw_signals',
          'file_path_missing_value_intervals']
 
 # get edf files
-raw_path = r"D:\scored_files_kj\train_model_all\raw_data"
-processed_path = r"D:\scored_files_kj\train_model_all\processed"
-save_path = r"D:\scored_files_kj\train_model_all\input_for_train.csv"
+raw_path = r"D:\sleep_scoring\scored_files_kj\train_model_all\raw_data"
+processed_path = r"D:\sleep_scoring\scored_files_kj\train_model_all\processed"
+save_path = r"D:\sleep_scoring\scored_files_kj\train_model_all\input_for_train.csv"
+sample_rate = 250
 edf_files = [file for file in os.listdir(raw_path) if file[-4:] == '.edf']
 
 # create dataframe
@@ -42,7 +43,7 @@ for edf_file in edf_files:
     row.append('EMG')
     
     # sampling_frequency_in_hz
-    row.append(400)
+    row.append(sample_rate)
     
     # file_path_preprocessed_signals
     row.append(os.path.join(processed_path, edf_file[:-4] +  '.npy'))

@@ -56,14 +56,14 @@ def save_to_edf(save_path, data, channel_properties):
 if __name__ == '__main__':
     
     # settings
-    load_path = r"R:\Collaborations\Seizure files for sleep scoring\labchart_data"
-    save_path = r"R:\Collaborations\Seizure files for sleep scoring\raw_data"
-    selected_recordings = pd.read_excel(r"R:\Collaborations\Seizure files for sleep scoring\file_info.xlsx")
+    load_path = r"D:\sleep_scoring\cus_files\labchart_data"
+    save_path = r"D:\sleep_scoring\cus_files\raw_data"
+    selected_recordings = pd.read_excel(r"D:\sleep_scoring\cus_files\CUS_file_info.xlsx")
     block = 1
     
     # edf settings with downsampled rate
     channel_properties = {
-           "sample_rate" : [400, 400, 400],
+           "sample_rate" : [250, 250, 250],
            "channel_name":  ["BLA-LFP","FC-EEG","EMG"],
            "dimension": ["V","V","V"],
            "physical_max": [0.1, 0.1, 0.01],
@@ -89,7 +89,10 @@ if __name__ == '__main__':
         ch_data = []
         for channel in channel_properties['channel_name']:
             ch_id = df.loc[df['channel_name'] == channel, 'channel_id'].values[0]
-            single_channel_data = fread.channels[ch_id-1].get_data(block)
+            start = int(df.loc[df['channel_name'] == channel, 'start_time_sec'].values[0] * fs)
+            stop = int(df.loc[df['channel_name'] == channel, 'stop_time_sec'].values[0] * fs)
+            stop = fread.records[0].n_ticks + stop
+            single_channel_data = fread.channels[ch_id-1].get_data(block, start_sample=start, stop_sample=stop)
             trim_len = len(single_channel_data) - len(single_channel_data)%channel_properties['sample_rate'][0]
             downsampled = decimate(single_channel_data[:trim_len], downsample_factor)
             ch_data.append(downsampled)
