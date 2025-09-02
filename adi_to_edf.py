@@ -97,6 +97,9 @@ if __name__ == '__main__':
             downsampled = decimate(single_channel_data[:trim_len], downsample_factor)
             ch_data.append(downsampled)
         del fread
+
+        # ensure save path exists
+        os.makedirs(save_path, exist_ok=True)
         
         # rewrite to edf file
         save_to_edf(os.path.join(save_path, edf_file_name), ch_data, channel_properties)
