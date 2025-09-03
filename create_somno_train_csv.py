@@ -14,7 +14,7 @@ How to use
 ----------
 1) Convert LabChart -> EDF and create hypnogram .txt files first.
 2) Edit the USER SETTINGS block below (paths, channel labels, sample rate).
-3) Run:  python create_somno_train_csv.py
+3) Run:  python create_somno_train.py
 """
 
 import os
@@ -73,7 +73,6 @@ def create_somno_train_csv(
         "file_path_missing_value_intervals",
     ]
 
-    # Basic checks
     if len(channel_labels) != 3:
         raise ValueError("channel_labels must have exactly 3 entries: [EEG1, EEG2, EMG].")
     if not os.path.isdir(raw_path):
@@ -84,12 +83,11 @@ def create_somno_train_csv(
     if not edf_files:
         raise FileNotFoundError(f"No EDF files found in: {raw_path}")
 
-    # Ensure output dir exists
-    os.makedirs(os.path.dirname(processed_path), exist_ok=True)
+    # Ensure output dirs exist (processed_path is a DIR; save_path is a FILE)
+    os.makedirs(processed_path, exist_ok=True)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    rows = []
-    skipped = []
+    rows, skipped = [], []
 
     for edf_file in edf_files:
         base = os.path.splitext(edf_file)[0]
@@ -101,7 +99,7 @@ def create_somno_train_csv(
             skipped.append((edf_file, "missing hypnogram"))
             continue
 
-        row = [
+        rows.append([
             edf_fp,                                 # file_path_raw_signals
             channel_labels[0],                      # eeg1_signal_label
             channel_labels[1],                      # eeg2_signal_label
@@ -116,14 +114,14 @@ def create_somno_train_csv(
             os.path.join(processed_path, f"{base}_automated_artefact_annotation.hyp"),
             os.path.join(processed_path, f"{base}_artefact_intervals.csv"),
             os.path.join(processed_path, f"{base}_missing_value_intervals.csv"),
-        ]
-        rows.append(row)
+        ])
 
     # Build DataFrame and write CSV
     df = pd.DataFrame(data=np.array(rows), columns=columns)
     df.to_csv(save_path, index=False)
 
     # Summary
+    print(f"\n---> Somnotate training CSV created: {save_path}")
     print(f"     EDF files found: {len(edf_files)}")
     print(f"     Rows written:    {len(rows)}")
     if skipped:
@@ -136,15 +134,14 @@ def create_somno_train_csv(
 
 if __name__ == "__main__":
     # --------------------------- USER SETTINGS --------------------------- #
-    PARENT_PATH = r"R:\Pantelis\for_sleep_scoring\trained_models"
+    PARENT_PATH    = r"R:\Pantelis\for_sleep_scoring\trained_models"
     EDF_PATH       = os.path.join(PARENT_PATH, 'edf_data')                      # EDFs + .txt hypnograms
     PROCESSED_PATH = os.path.join(PARENT_PATH, 'processed')                     # Somnotate outputs
     SAVE_PATH      = os.path.join(PARENT_PATH, 'somno_input_for_train.csv')     # output CSV for somnotate
     SAMPLE_RATE    = 250                                                        # Hz
     CHANNEL_LABELS = ["BLA-LFP", "FC-EEG", "EMG"]                               # Must match EDF channel order
 
-    # Require a .txt hypnogram next to each EDF to include it in training:
-    REQUIRE_HYPNOGRAM = True
+    REQUIRE_HYPNOGRAM = True   # require a .txt hypnogram next to each EDF
     # -------------------------------------------------------------------- #
 
     create_somno_train_csv(
@@ -155,4 +152,3 @@ if __name__ == "__main__":
         sample_rate=SAMPLE_RATE,
         require_hypnogram=REQUIRE_HYPNOGRAM,
     )
-    print(f"---> Somnotate training CSV created: {SAVE_PATH}")

@@ -192,9 +192,9 @@ if __name__ == '__main__':
     # ------------------------------ USER SETTINGS ------------------------------ #
     # Where your LabChart .adicht files live:
     PARENT_PATH   = r"C:\temp_files_to_clean\sleep_scoring\scored_files_kj\train_new_scripts"
-    LABCHART_PATH = os.path.join(PARENT_PATH, "labchart_data")      # Folder with .adicht files
-    EDF_OUT_PATH  = os.path.join(PARENT_PATH, "edf_data")           # Where to save .edf files
-    INDEX_FILE    = os.path.join(PARENT_PATH, "file_index.xlsx")    # Excel with recording info
+    LABCHART_PATH = os.path.join(PARENT_PATH, "labchart_data")          # Folder with .adicht files
+    EDF_OUT_PATH  = os.path.join(PARENT_PATH, "edf_data")               # Where to save .edf files
+    INDEX_FILE_PATH  = os.path.join(PARENT_PATH, "file_index.xlsx")     # Excel with recording info
 
     # LabChart block index to read:
     BLOCK_INDEX   = 1
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------- #
 
     # Load metadata and run
-    selected = pd.read_excel(INDEX_FILE)
+    selected = pd.read_excel(INDEX_FILE_PATH)
     process_training_recordings(
         selected_recordings=selected,
         labchart_path=LABCHART_PATH,
