@@ -25,13 +25,7 @@ def save_to_edf(save_path, data, channel_properties):
         Dict containing metadata for each channel. Required keys (all lists):
             - "sample_rate", "channel_name", "dimension",
               "physical_max", "physical_min", "digital_max", "digital_min"
-
-    Raises
-    ------
-    Exception
-        If number of channels in `data` does not match metadata lengths.
     """
-
     n_channels = len(channel_properties["channel_name"])
     if len(data) != n_channels:
         raise Exception("--> Channel count mismatch between data and metadata.")
@@ -44,16 +38,15 @@ def save_to_edf(save_path, data, channel_properties):
     # Build EDF signal headers
     channel_info = []
     for i in range(n_channels):
-        channel_dict = {
+        channel_info.append({
             "sample_rate": channel_properties["sample_rate"][i],
-            "label": channel_properties["channel_name"][i],
-            "dimension": channel_properties["dimension"][i],
+            "label":        channel_properties["channel_name"][i],
+            "dimension":    channel_properties["dimension"][i],
             "physical_max": channel_properties["physical_max"][i],
             "physical_min": channel_properties["physical_min"][i],
-            "digital_max": channel_properties["digital_max"][i],
-            "digital_min": channel_properties["digital_min"][i],
-        }
-        channel_info.append(channel_dict)
+            "digital_max":  channel_properties["digital_max"][i],
+            "digital_min":  channel_properties["digital_min"][i],
+        })
 
     # Write EDF file
     with pyedflib.EdfWriter(save_path, n_channels, file_type=pyedflib.FILETYPE_EDF) as edf:
@@ -64,26 +57,10 @@ def save_to_edf(save_path, data, channel_properties):
 def process_recordings(selected_recordings, load_path, save_path, block, channel_properties):
     """
     Process all recordings listed in the metadata DataFrame, convert LabChart data to EDF.
-
-    Parameters
-    ----------
-    selected_recordings : pd.DataFrame
-        Metadata for all recordings (must include columns: recording_id, file_name,
-        channel_name, channel_id, start_time_sec, stop_time_sec, animal_position).
-    load_path : str
-        Directory containing LabChart input files.
-    save_path : str
-        Directory to save EDF files (created if missing).
-    block : int
-        LabChart block index to read.
-    channel_properties : dict
-        EDF channel settings (see save_to_edf docstring).
     """
-
     os.makedirs(save_path, exist_ok=True)
 
-    for rec_id, df in tqdm(selected_recordings.groupby('recording_id')):
-
+    for rec_id, df in tqdm(selected_recordings.groupby('recording_id'), desc="Converting to EDF"):
         # Pick representative row (prefer BLA channel, else first row)
         bla_rows = df[df['channel_name'].str.contains('BLA', case=False, na=False)]
         base_row = bla_rows.iloc[0] if len(bla_rows) else df.iloc[0]
@@ -92,8 +69,13 @@ def process_recordings(selected_recordings, load_path, save_path, block, channel
         animal_pos = str(base_row.get('animal_position', 'NA'))
         edf_file_name = f"{raw_name}_an{animal_pos}.edf"
 
-        # Open LabChart file and determine sampling info
+        # Build full path and SKIP if LabChart file is missing
         file_path = os.path.join(load_path, base_row['file_name'])
+        if not os.path.exists(file_path):
+            print(f"\n---> LabChart file not found; skipping recording_id {rec_id}:\n     {file_path}")
+            continue
+
+        # Open LabChart file and determine sampling info
         fread = adi.read_file(file_path)
         fs = float(fread.channels[0].fs[0])
         target_sr = float(channel_properties['sample_rate'][0])
@@ -128,10 +110,11 @@ def process_recordings(selected_recordings, load_path, save_path, block, channel
 if __name__ == '__main__':
 
     # ------------------------- User Settings -------------------------
-    load_path = r"D:\sleep_scoring\cus_files\labchart_data"             # Folder with LabChart files
-    save_path = r"D:\sleep_scoring\cus_files\raw_data"                  # Output folder for EDF files
-    recording_path = r"D:\sleep_scoring\cus_files\CUS_file_info.xlsx"   # Excel with recording info
-    block = 1                                                           # LabChart block index
+    PARENT_PATH   = r"C:\temp_files_to_clean\sleep_scoring\pilot_test"
+    LABCHART_PATH = os.path.join(PARENT_PATH, "labchart_data")    # Folder with LabChart files
+    EDF_PATH      = os.path.join(PARENT_PATH, "edf_data")         # Output folder for EDF files
+    INDEX_FILE    = os.path.join(PARENT_PATH, "CUS_file_info.xlsx")  # Excel with recording info
+    block = 1                                                     # LabChart block index
 
     # Channel properties (edit as needed)
     channel_properties = {
@@ -146,6 +129,6 @@ if __name__ == '__main__':
     # -----------------------------------------------------------------
 
     # Read metadata and process recordings
-    selected_recordings = pd.read_excel(excel_file)
-    process_recordings(selected_recordings, load_path, save_path, block, channel_properties)
+    selected_recordings = pd.read_excel(INDEX_FILE)
+    process_recordings(selected_recordings, LABCHART_PATH, EDF_PATH, block, channel_properties)
     print('---> All files were converted to EDF.')

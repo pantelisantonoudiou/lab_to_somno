@@ -86,7 +86,9 @@ def create_somno_csv(
 
     df = pd.DataFrame(data=np.array(data), columns=columns)
 
-    # ensure output folder exists
+
+    # ensure output dir exists
+    os.makedirs(processed_path, exist_ok=True)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     df.to_csv(save_path, index=False)
 
@@ -96,11 +98,12 @@ def create_somno_csv(
 
 if __name__ == "__main__":
     # ------------------------- USER SETTINGS ------------------------- #
-    EDF_PATH = r"D:\sleep_scoring\cus_files\raw_data"             # folder with EDF files
-    PROCESSED_PATH = r"D:\sleep_scoring\cus_files\processed"      # folder for processed/annotation files
-    CSV_PATH = r"D:\sleep_scoring\cus_files\somno_input.csv"      # output CSV
-    SAMPLE_RATE = 250                                             # Hz
-    CHANNEL_LABELS = ["BLA-LFP", "FC-EEG", "EMG"]                 # must be 3 labels
+    PARENT_PATH = r"C:\temp_files_to_clean\sleep_scoring\pilot_test"
+    EDF_PATH = os.path.join(PARENT_PATH, 'edf_data')             # folder with EDF files
+    PROCESSED_PATH = os.path.join(PARENT_PATH, 'processed')      # folder for processed/annotation files
+    CSV_PATH = os.path.join(PARENT_PATH, 'somno_input.csv')      # output CSV
+    SAMPLE_RATE = 250                                            # Hz
+    CHANNEL_LABELS = ["BLA-LFP", "FC-EEG", "EMG"]                # must be 3 labels
     # ---------------------------------------------------------------- #
 
     create_somno_csv(

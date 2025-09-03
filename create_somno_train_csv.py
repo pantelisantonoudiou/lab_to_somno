@@ -136,12 +136,12 @@ def create_somno_train_csv(
 
 if __name__ == "__main__":
     # --------------------------- USER SETTINGS --------------------------- #
-    PARENT_PATH = r"C:\temp_files_to_clean\sleep_scoring\scored_files_kj\train_model_all"
-    EDF_PATH       = os.path.join(PARENT_PATH, 'edf_data')              # EDFs + .txt hypnograms
-    PROCESSED_PATH = os.path.join(PARENT_PATH, 'processed')             # Somnotate outputs
-    SAVE_PATH      = os.path.join(PARENT_PATH, 'input_for_train.csv')   # output CSV for somnotate
-    SAMPLE_RATE    = 250                                                # Hz
-    CHANNEL_LABELS = ["BLA-LFP", "FC-EEG", "EMG"]                       # Must match EDF channel order
+    PARENT_PATH = r"R:\Pantelis\for_sleep_scoring\trained_models"
+    EDF_PATH       = os.path.join(PARENT_PATH, 'edf_data')                      # EDFs + .txt hypnograms
+    PROCESSED_PATH = os.path.join(PARENT_PATH, 'processed')                     # Somnotate outputs
+    SAVE_PATH      = os.path.join(PARENT_PATH, 'somno_input_for_train.csv')     # output CSV for somnotate
+    SAMPLE_RATE    = 250                                                        # Hz
+    CHANNEL_LABELS = ["BLA-LFP", "FC-EEG", "EMG"]                               # Must match EDF channel order
 
     # Require a .txt hypnogram next to each EDF to include it in training:
     REQUIRE_HYPNOGRAM = True
